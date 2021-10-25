@@ -1,10 +1,16 @@
 const router = require('express').Router()
-const fs = require('fs')
+const connection = require('../config/db.config.js')
 
 router.get('/users', (req, res) => {
-    fs.readFile('users.json', 'utf-8', (err,data) => {
-        if (err) throw new Error(err)
-        res.end(data)
+    connection.connect()
+    connection.query("Select name, age from users", (error, rows, fields) => {
+        if (error) throw new Error(error)
+        let users = [];
+        for(let i = 0; i < rows.length; i++) {
+            users.push(rows[i])
+        }
+        res.end(JSON.stringify(users));
+        connection.end()
     })
 })
 

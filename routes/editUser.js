@@ -1,21 +1,16 @@
 const router = require('express').Router()
-const fs = require('fs')
-const userList = require('../users.json')
+const connection = require('../config/db.config.js')
 
 router.patch('/users/:userId', (req, res) => {
+    connection.connect()
     let { userId } = req.params;
-    let currentUser = userList.find(user => user.id === userId)
-    if (currentUser) {
-        currentUser.name = req.body?.name || currentUser.name
-        currentUser.age = req.body?.age || currentUser.age
-        fs.writeFile('users.json', JSON.stringify(userList), err => {
-            if (err) throw new Error(err)
-        })
-        res.end(JSON.stringify(currentUser))
-    }
-    else {
-        res.status(404).end('User not found')
-    }
+    let name = req.body?.name;
+    let age = req.body?.age;
+    connection.query(`Update users set name = "${name}", age = ${age} where id = ${userId}`, (error, rows, fields) => {
+        if (error) throw new Error(error)
+        res.end("Edited")
+    })
+    connection.end()
 })
 
 module.exports = router;

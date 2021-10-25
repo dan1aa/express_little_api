@@ -1,19 +1,15 @@
 const router = require('express').Router()
-const fs = require('fs')
-const uuid = require('uuid')
-const userList = require('../users.json')
+const connection = require('../config/db.config.js')
 
 router.post('/users/new', (req, res) => {
-    let newUser = {
-        id: uuid.v1(),
-        name: req.body?.name || 'Name not selected',
-        age: req.body?.age || "Age not selected"
-    }
-    userList.push(newUser)
-    fs.writeFile('users.json', JSON.stringify(userList), err => {
-        if (err) throw new Error(err)
+    connection.connect()
+    let username = req.body.name;
+    let userage = req.body.age;
+    connection.query(`Insert into users(name, age) values("${username}", ${userage})`, (error, rows, fields) => {
+        if (error) throw new Error(error)
+        res.end("Added")
     })
-    res.end(JSON.stringify(newUser))
+    connection.end()
 })
 
 module.exports = router;
